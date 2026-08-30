@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Star Breeding Guide</title>
+  <style>
+    :root {
+      --bg: #0b0d14;
+      --panel: rgba(22, 27, 38, 0.75);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(30, 38, 56, 0.6);
+      --card-hover-border: #7000ff;
+      
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+      
+      --danger: #ff4757;
+      --text-main: #f8fafc;
+      --subtext: #94a3b8;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @media (pointer: fine) {
+      body.custom-cursor-enabled * { cursor: none !important; }
+      #custom-cursor, #cursor-follower { display: block; }
+    }
+    @media (pointer: coarse) {
+      #custom-cursor, #cursor-follower { display: none !important; }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      padding: 24px 16px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    #custom-cursor {
+      position: fixed;
+      top: 0; left: 0;
+      width: 32px; height: 32px;
+      pointer-events: none !important;
+      z-index: 999999;
+    }
+
+    #cursor-follower {
+      position: fixed;
+      top: 0; left: 0;
+      width: 64px; height: 64px;
+      pointer-events: none !important;
+      z-index: 999998;
+      transform: translate(-10%, -10%);
+    }
+
+    #cursor-follower img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      pointer-events: none !important;
+      filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+    }
+
+    /* AUTH OVERLAY */
+    .auth-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(11, 13, 20, 0.85);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: 40px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(139, 92, 246, 0.2);
+    }
+
+    .auth-card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .credits {
+      font-size: 0.85rem;
+      color: var(--subtext);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    input[type="text"], input[type="password"], select {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    /* HEADER & CONTAINER */
+    header {
+      max-width: 1100px;
+      margin: 0 auto 28px auto;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .sub-credits {
+      font-size: 0.85rem;
+      color: var(--subtext);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* PAINEL DE FILTROS */
+    .filter-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    @media (min-width: 600px) {
+      .search-row { flex-direction: row; }
+    }
+
+    .search-row input[type="text"] { flex: 1; }
+
+    .gender-select { width: 100%; }
+
+    @media (min-width: 600px) {
+      .gender-select { width: 260px; }
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      padding-top: 14px;
+      border-top: 1px solid var(--panel-border);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--subtext);
+      user-select: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .checkbox-label:hover { color: var(--text-main); }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent-purple);
+      cursor: pointer;
+    }
+
+    .status-bar {
+      font-size: 0.85rem;
+      color: var(--subtext);
+      margin-bottom: 16px;
+      text-align: right;
+    }
+
+    /* GRID DE CARDS */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+    }
+
+    @media (min-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+        gap: 14px;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      content-visibility: auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: var(--radius);
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--card-hover-border);
+      box-shadow: 0 8px 25px rgba(112, 0, 255, 0.25);
+      background: rgba(38, 48, 72, 0.7);
+    }
+
+    .card img {
+      width: 68px; height: 68px;
+      image-rendering: pixelated;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    }
+
+    @media (min-width: 600px) {
+      .card img { width: 76px; height: 76px; }
+    }
+
+    .card h3 {
+      font-size: 0.82rem;
+      text-transform: capitalize;
+      margin-top: 8px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      pointer-events: none;
+    }
+
+    #sentinel { height: 20px; margin-top: 20px; }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(11, 13, 20, 0.85);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 680px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(6, 182, 212, 0.15);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 16px; right: 20px;
+      font-size: 24px;
+      color: var(--subtext);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover { color: var(--danger); }
+
+    .breed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    @media (min-width: 600px) {
+      .breed-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+    }
+
+    .breed-card {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      font-size: 11px;
+      transition: border-color 0.2s;
+    }
+
+    .breed-card:hover { border-color: var(--accent-cyan); }
+
+    .breed-card img {
+      width: 48px; height: 48px;
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body class="custom-cursor-enabled">
+
+  <svg id="custom-cursor" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0V24L6 18L11 28L15 26L10 16H18L0 0Z" fill="#090a21"/>
+    <path d="M2 3V20L6.5 15.5L10.5 24.5L12.5 23.5L8.5 14.5H15L2 3Z" fill="#8b5cf6"/>
+    <path d="M3 5V16L6 13L8 18L9 17.5L7 12.5H12L3 5Z" fill="#06b6d4"/>
+  </svg>
+  
+  <div id="cursor-follower">
+    <img id="follower-img" src="" alt="Seguidor">
+  </div>
+
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+      <h2>Star Breeding Guide</h2>
+      <p class="credits">
+        Desenvolvido por <strong>jhuan_batatinha</strong><br>
+        Discord: <strong>brazilsil</strong>
+      </p>
+      
+      <div class="auth-form">
+        <input type="password" id="accessCodeInput" placeholder="Código de Acesso">
+        <button class="btn-primary" id="submitCodeBtn" type="button">Acessar Guia</button>
+        <span class="error-msg" id="errorMsg">Código incorreto. Tente novamente.</span>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <h1>Star Breeding Guide</h1>
+    <div class="sub-credits">
+      Criado por <strong>jhuan_batatinha</strong> &bull; Discord: <strong>brazilsil</strong>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="filter-panel">
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="Pesquisar por nome ou ID exato...">
+        
+        <select id="genderSelect" class="gender-select">
+          <option value="male">Base: Macho (♂)</option>
+          <option value="female">Base: Fêmea (♀)</option>
+          <option value="genderless">Base: Sem Gênero (⚲)</option>
+        </select>
+      </div>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkLegendary"> Ocultar Lendários / Míticos
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkUltraBeasts"> Ocultar Ultra Beasts
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkParadox"> Ocultar Paradoxos
+        </label>
+      </div>
+    </div>
+
+    <div class="status-bar" id="statusBar">Aguardando autenticação...</div>
+    <div class="grid" id="pokemonGrid"></div>
+    <div id="sentinel"></div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeBtn">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const FOLLOWER_IMAGE_URL = "https://cdn.discordapp.com/attachments/1407151994002477179/1543633044856897727/minecraft-pixel-art-ditto-png-favpng-SmkZhbm9YDj7ReWgRif5S9cdR-removebg-preview.png?ex=6a9593cd&is=6a94424d&hm=f1ccdf74158e95499dba45455ef758b09f385baeae4558774931ad9c4c670da6";
+    const ACCESS_CODE = "125Ibdex";
+    
+    const ULTRA_BEASTS = new Set([793, 794, 795, 796, 797, 798, 799, 803, 804, 805, 806]);
+    const PARADOX_POKEMON = new Set([
+      984, 985, 986, 987, 988, 989, 990, 991, 992, 993, 994, 995,
+      1005, 1006, 1007, 1008, 1009, 1010, 1020, 1021, 1022, 1023
+    ]);
+    const LEGENDARY_MYTHICAL = new Set([
+      144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386,
+      480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643,
+      644, 645, 646, 647, 648, 649, 716, 717, 718, 719, 720, 721, 785, 786, 787, 788, 789, 790, 791, 792, 800,
+      801, 802, 807, 808, 809, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, 905, 1001, 1002, 1003,
+      1004, 1014, 1015, 1016, 1017, 1024, 1025
+    ]);
+
+    let allPokemonList = [];
+    let currentFilteredList = [];
+    let renderedCount = 0;
+    const PAGE_SIZE = 60;
+    const speciesCache = new Map();
+
+    // TOKEN PARA CANCELAR CARREGAMENTOS ASSÍNCRONOS SE O MODAL FECHAR
+    let currentBreedingToken = 0;
+
+    const customCursor = document.getElementById('custom-cursor');
+    const cursorFollower = document.getElementById('cursor-follower');
+    const followerImg = document.getElementById('follower-img');
+    const authOverlay = document.getElementById('authOverlay');
+    const accessCodeInput = document.getElementById('accessCodeInput');
+    const submitCodeBtn = document.getElementById('submitCodeBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    
+    const pokemonGrid = document.getElementById('pokemonGrid');
+    const searchInput = document.getElementById('searchInput');
+    const genderSelect = document.getElementById('genderSelect');
+    const chkLegendary = document.getElementById('chkLegendary');
+    const chkUltraBeasts = document.getElementById('chkUltraBeasts');
+    const chkParadox = document.getElementById('chkParadox');
+    const statusBar = document.getElementById('statusBar');
+    const modal = document.getElementById('modal');
+    const modalBody = document.getElementById('modalBody');
+    const closeBtn = document.getElementById('closeBtn');
+    const sentinel = document.getElementById('sentinel');
+
+    if (followerImg) followerImg.src = FOLLOWER_IMAGE_URL;
+
+    let mouseX = -100, mouseY = -100;
+    let followerX = -100, followerY = -100;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (customCursor) {
+        customCursor.style.left = `${mouseX}px`;
+        customCursor.style.top = `${mouseY}px`;
+      }
+    });
+
+    function animateCursor() {
+      followerX += (mouseX - followerX) * 0.15;
+      followerY += (mouseY - followerY) * 0.15;
+      
+      if (cursorFollower) {
+        cursorFollower.style.left = `${followerX}px`;
+        cursorFollower.style.top = `${followerY}px`;
+      }
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    async function checkCode() {
+      const inputVal = accessCodeInput.value.trim();
+      if (inputVal !== ACCESS_CODE) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerText = "Código incorreto. Tente novamente.";
+        accessCodeInput.value = '';
+        accessCodeInput.focus();
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      submitCodeBtn.disabled = true;
+      submitCodeBtn.innerText = "Carregando...";
+
+      try {
+        await initDatabase();
+        authOverlay.style.display = 'none';
+      } catch (err) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerText = "Erro ao conectar com a API. Tente novamente.";
+        submitCodeBtn.disabled = false;
+        submitCodeBtn.innerText = "Acessar Guia";
+      }
+    }
+
+    submitCodeBtn.addEventListener('click', (e) => { e.preventDefault(); checkCode(); });
+    accessCodeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); checkCode(); } });
+
+    async function initDatabase() {
+      statusBar.innerText = "Carregando Pokédex...";
+      const res = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=1025');
+      if (!res.ok) throw new Error("Erro na requisição");
+      
+      const data = await res.json();
+      allPokemonList = data.results.map((item, idx) => ({
+        id: idx + 1,
+        name: item.name,
+        url: item.url
+      }));
+
+      setupLazyLoading();
+      renderView();
+    }
+
+    async function getSpeciesDetails(pkmn) {
+      if (speciesCache.has(pkmn.id)) return speciesCache.get(pkmn.id);
+
+      try {
+        const speciesData = await fetch(pkmn.url).then(r => r.json());
+        const eggGroups = speciesData.egg_groups.map(g => g.name);
+
+        const details = {
+          id: pkmn.id,
+          name: pkmn.name,
+          eggGroups: eggGroups,
+          isInfertile: speciesData.is_baby || eggGroups.includes("no-eggs") || eggGroups.includes("undiscovered"),
+          isDitto: pkmn.name === 'ditto',
+          isLegendary: LEGENDARY_MYTHICAL.has(pkmn.id) || speciesData.is_legendary || speciesData.is_mythical,
+          genderRate: speciesData.gender_rate,
+          genderless: speciesData.gender_rate === -1
+        };
+
+        speciesCache.set(pkmn.id, details);
+        return details;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function renderView() {
+      const query = searchInput.value.toLowerCase().trim();
+      const hideLegendaries = chkLegendary.checked;
+      const hideUBs = chkUltraBeasts.checked;
+      const hideParadox = chkParadox.checked;
+
+      currentFilteredList = allPokemonList.filter(p => {
+        if (query !== '' && !p.name.toLowerCase().includes(query) && p.id.toString() !== query) return false;
+        if (hideLegendaries && LEGENDARY_MYTHICAL.has(p.id)) return false;
+        if (hideUBs && ULTRA_BEASTS.has(p.id)) return false;
+        if (hideParadox && PARADOX_POKEMON.has(p.id)) return false;
+        return true;
+      });
+
+      statusBar.innerText = `Exibindo ${currentFilteredList.length} de ${allPokemonList.length} Pokémon`;
+      pokemonGrid.innerHTML = '';
+      renderedCount = 0;
+
+      if (currentFilteredList.length === 0) {
+        pokemonGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color: var(--subtext); padding: 40px;">Nenhum Pokémon atende aos filtros atuais.</div>`;
+        return;
+      }
+
+      renderNextBatch();
+    }
+
+    function renderNextBatch() {
+      if (renderedCount >= currentFilteredList.length) return;
+
+      const nextBatch = currentFilteredList.slice(renderedCount, renderedCount + PAGE_SIZE);
+      const frag = document.createDocumentFragment();
+
+      nextBatch.forEach(pkmn => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          openBreedingModal(pkmn);
+        });
+
+        const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pkmn.id}.png`;
+        card.innerHTML = `
+          <img src="${spriteUrl}" alt="${pkmn.name}" loading="lazy" decoding="async">
+          <h3>${pkmn.name}</h3>
+        `;
+        frag.appendChild(card);
+      });
+
+      pokemonGrid.appendChild(frag);
+      renderedCount += nextBatch.length;
+    }
+
+    function setupLazyLoading() {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          renderNextBatch();
+        }
+      }, { rootMargin: '300px' });
+
+      observer.observe(sentinel);
+    }
+
+    // CANCELAR TUDO AO FECHAR MODAL
+    function closeModal() {
+      modal.style.display = 'none';
+      currentBreedingToken++; // Invalida requisições ativas
+    }
+
+    async function openBreedingModal(pkmn) {
+      // Cria um novo token de operação
+      const thisToken = ++currentBreedingToken;
+
+      modalBody.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--subtext);">Analisando compatibilidade de ${pkmn.name}...</div>`;
+      modal.style.display = 'flex';
+
+      const targetData = await getSpeciesDetails(pkmn);
+      
+      // Se o modal foi fechado durante a busca inicial, interrompe imediatamente
+      if (thisToken !== currentBreedingToken) return;
+
+      if (!targetData) {
+        modalBody.innerHTML = `<p style="text-align:center;">Erro ao carregar dados.</p>`;
+        return;
+      }
+
+      const selectedBaseGender = genderSelect.value;
+      const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${targetData.id}.png`;
+
+      if (targetData.isDitto) {
+        modalBody.innerHTML = `
+          <div style="text-align: center;">
+            <h2 style="color: var(--accent-cyan);">DITTO</h2>
+            <img src="${spriteUrl}" style="width: 96px;">
+            <p style="margin-top: 10px; color: var(--subtext);">Ditto cruza com qualquer Pokémon fértil (Macho, Fêmea ou Sem Gênero). Não cruza com outro Ditto nem com o grupo Undiscovered.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (targetData.isInfertile) {
+        modalBody.innerHTML = `
+          <div style="text-align:center;">
+            <h2>${targetData.name.toUpperCase()}</h2>
+            <img src="${spriteUrl}" style="width: 96px;">
+            <p style="margin-top: 10px; color: var(--danger);">Esta espécie pertence ao grupo Undiscovered (ou é um Baby Pokémon) e NÃO CRUZA com NINGUÉM (Nem mesmo com Ditto).</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (selectedBaseGender === 'male' && targetData.genderRate === 8) {
+        modalBody.innerHTML = `
+          <div style="text-align:center;">
+            <h2>${targetData.name.toUpperCase()}</h2>
+            <img src="${spriteUrl}" style="width: 96px;">
+            <p style="margin-top: 10px; color: var(--danger);">${targetData.name.toUpperCase()} é uma espécie 100% Fêmea e não pode ser analisada como Macho.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (selectedBaseGender === 'female' && targetData.genderRate === 0) {
+        modalBody.innerHTML = `
+          <div style="text-align:center;">
+            <h2>${targetData.name.toUpperCase()}</h2>
+            <img src="${spriteUrl}" style="width: 96px;">
+            <p style="margin-top: 10px; color: var(--danger);">${targetData.name.toUpperCase()} é uma espécie 100% Macho e não pode ser analisada como Fêmea.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (selectedBaseGender === 'genderless' && !targetData.genderless) {
+        modalBody.innerHTML = `
+          <div style="text-align:center;">
+            <h2>${targetData.name.toUpperCase()}</h2>
+            <img src="${spriteUrl}" style="width: 96px;">
+            <p style="margin-top: 10px; color: var(--danger);">${targetData.name.toUpperCase()} possui gênero definido e não pode ser analisado como Sem Gênero.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if ((selectedBaseGender === 'male' || selectedBaseGender === 'female') && targetData.genderless) {
+        modalBody.innerHTML = `
+          <div style="text-align:center;">
+            <h2>${targetData.name.toUpperCase()} (Sem Gênero)</h2>
+            <img src="${spriteUrl}" style="width: 96px;">
+            <p style="margin-top: 10px; color: var(--subtext);">${targetData.name.toUpperCase()} é uma espécie Sem Gênero. O filtro foi automaticamente tratado como Genderless.</p>
+            <hr style="border-color: var(--panel-border); margin: 16px 0;">
+            <p style="font-size: 0.9rem;"><strong>1</strong> parceiro compatível:</p>
+            <div class="breed-grid">
+              <div class="breed-card">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="ditto">
+                <div>ditto</div>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let genderLabel = selectedBaseGender === 'male' ? "Macho (♂)" : (selectedBaseGender === 'female' ? "Fêmea (♀)" : "Sem Gênero (⚲)");
+      let partnerTitle = selectedBaseGender === 'male' ? "Fêmeas (♀) Compatíveis + Ditto" : (selectedBaseGender === 'female' ? "Machos (♂) Compatíveis + Ditto" : "Parceiro Compatível (Exclusivo Ditto)");
+
+      modalBody.innerHTML = `
+        <div style="text-align: center;">
+          <h2 style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">${targetData.name.toUpperCase()} (${genderLabel})</h2>
+          <div><img src="${spriteUrl}" style="width: 96px;"></div>
+          <p style="font-size: 0.9rem; color: var(--subtext);">Grupos de Ovos: ${targetData.eggGroups.join(', ')}</p>
+        </div>
+        <hr style="border-color: var(--panel-border); margin: 16px 0;">
+        <div id="modalResults">Analisando parceiros compatíveis...</div>
+      `;
+
+      // PRÉ-FILTRAGEM E OTIMIZAÇÃO EXTREMA DE PROCESSAMENTO
+      const hideLegendaries = chkLegendary.checked;
+      const hideUBs = chkUltraBeasts.checked;
+      const hideParadox = chkParadox.checked;
+      const targetEggGroupsSet = new Set(targetData.eggGroups);
+
+      const candidates = allPokemonList.filter(p => {
+        if (hideLegendaries && LEGENDARY_MYTHICAL.has(p.id)) return false;
+        if (hideUBs && ULTRA_BEASTS.has(p.id)) return false;
+        if (hideParadox && PARADOX_POKEMON.has(p.id)) return false;
+        return true;
+      });
+
+      const compatibles = [];
+      const chunkSize = 35; 
+
+      for (let i = 0; i < candidates.length; i += chunkSize) {
+        // Interrompe o processamento imediatamente se o usuário fechar o modal
+        if (thisToken !== currentBreedingToken) return;
+
+        const chunk = candidates.slice(i, i + chunkSize);
+        const chunkDetails = await Promise.all(chunk.map(p => getSpeciesDetails(p)));
+
+        for (const other of chunkDetails) {
+          if (!other || other.isInfertile) continue;
+
+          if (selectedBaseGender === 'genderless' || targetData.genderless) {
+            if (other.isDitto) compatibles.push(other);
+            continue;
+          }
+
+          if (other.isDitto) {
+            compatibles.push(other);
+            continue;
+          }
+          if (other.genderless) continue;
+
+          if (selectedBaseGender === 'male' && other.genderRate === 0) continue;
+          if (selectedBaseGender === 'female' && other.genderRate === 8) continue;
+
+          // Busca otimizada O(1) usando Set
+          if (other.eggGroups.some(g => targetEggGroupsSet.has(g))) {
+            compatibles.push(other);
+          }
+        }
+        
+        // Mantém a UI 100% fluida
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+
+      // Se o modal ainda estiver aberto ao terminar, renderiza os resultados
+      if (thisToken === currentBreedingToken) {
+        const modalResults = document.getElementById('modalResults');
+        if (modalResults) {
+          if (compatibles.length === 0) {
+            modalResults.innerHTML = `<p style="text-align:center; color: var(--subtext);">Nenhum parceiro compatível encontrado com os filtros selecionados.</p>`;
+          } else {
+            let html = `<p style="font-size: 0.9rem; margin-bottom: 8px;"><strong>${compatibles.length}</strong> ${partnerTitle.toLowerCase()}:</p><div class="breed-grid">`;
+            compatibles.forEach(c => {
+              const imgUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${c.id}.png`;
+              html += `
+                <div class="breed-card">
+                  <img src="${imgUrl}" alt="${c.name}" loading="lazy" decoding="async">
+                  <div style="text-transform: capitalize;">${c.name}</div>
+                </div>
+              `;
+            });
+            html += `</div>`;
+            modalResults.innerHTML = html;
+          }
+        }
+      }
+    }
+
+    searchInput.addEventListener('input', renderView);
+    genderSelect.addEventListener('change', renderView);
+    chkLegendary.addEventListener('change', renderView);
+    chkUltraBeasts.addEventListener('change', renderView);
+    chkParadox.addEventListener('change', renderView);
+
+    closeBtn.onclick = closeModal;
+    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+  </script>
+</body>
+</html>
